@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Offers</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button [routerLink]="['/places/tabs/offers/new']" >
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-sm="8" offset-sm="2">
+        <ng-container *ngIf="$places | async as places; else placesError">
+          <div *ngIf="isLoading" text-center>
+            <ion-spinner></ion-spinner>
+          </div>
+
+          <ion-list *ngIf="!isLoading && places.length != 0 ">
+            <ion-item-sliding *ngFor="let place of places" #slidingItem>
+                <offer-item [place]="place"></offer-item>
+              <ion-item-options>
+                <ion-item-option 
+                  (click)="onEdit(place.id, slidingItem)" color="danger">
+                  <ion-icon name="create" slot="icon-only"></ion-icon>
+                </ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
+          </ion-list>
+
+          <div *ngIf="!isLoading && places.length == 0" text-center>
+            <p>No offer places at the moment. Please add some!</p>
+            <ion-button color="primary" routerLink="/places/tabs/offers/new">Add New Offer</ion-button>
+          </div>
+        </ng-container>
+        <ng-template #placesError>
+          <div text-center>
+            <p>Could not load places at this time</p>
+          </div>
+        </ng-template>
+        
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

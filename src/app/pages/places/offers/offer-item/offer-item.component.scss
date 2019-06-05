@@ -1,0 +1,17 @@
+ion-label{
+    h1{
+        font-size: 18px;
+    }
+}
+
+.offer-details{
+    display: flex;
+    align-items: center;
+
+    .margin-left{
+        margin-left: 5px;
+    }
+    ion-text{
+        font-size: 13px;
+    }
+}

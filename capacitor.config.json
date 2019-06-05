@@ -1,0 +1,8 @@
+{
+  "appId": "com.deevcorp.ionic-angular",
+  "appName": "ionic-project-course",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "windowsAndroidStudioPath": "D:\\Program Files\\Android Studio\\bin\\studio64.exe"
+}

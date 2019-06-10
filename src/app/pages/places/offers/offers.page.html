@@ -34,9 +34,13 @@
             </ion-item-sliding>
           </ion-list>
 
-          <div *ngIf="!isLoading && places.length == 0" text-center>
+          <div *ngIf="!isLoading && places.length == 0 && error == false" text-center>
             <p>No offer places at the moment. Please add some!</p>
             <ion-button color="primary" routerLink="/places/tabs/offers/new">Add New Offer</ion-button>
+          </div>
+
+          <div *ngIf="!isLoading && error == true" text-center>
+            <p>Error fetching request... try again later.</p>
           </div>
         </ng-container>
         <ng-template #placesError>

@@ -37,12 +37,23 @@
             </ion-item-sliding>
           </ion-list>
       </ion-col>
+    
       <ion-col
       size-md="6" 
       offset-md="3"
       text-center
-      *ngIf="!isLoading && (!bookings || bookings.length <= 0)">
+      *ngIf="!isLoading && (!bookings || bookings.length <= 0) && !error"
+      >
         <p>No Bookings available...</p>
+      </ion-col>
+      
+      <ion-col
+        size-md="6"
+        offset-md="3"
+        text-center
+        *ngIf="!isLoading && error == true"
+      >
+        <p> Error fetching request... try again later </p>
       </ion-col>
     </ion-row>
   </ion-grid>

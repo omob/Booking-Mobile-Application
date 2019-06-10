@@ -4,6 +4,7 @@ import { PlacesService } from './../../places.service';
 import { Router } from '@angular/router';
 import { Place } from './../../place.model';
 import { LoadingController } from '@ionic/angular';
+import { PlaceLocation } from 'src/app/pages/places/location.model';
 
 @Component({
   selector: 'app-new-offer',
@@ -27,11 +28,17 @@ export class NewOfferPage implements OnInit {
         description: new FormControl( null, [ Validators.required, Validators.maxLength(180)]),
         price: new FormControl( null, [ Validators.required, Validators.min(1) ]),
         dateFrom: new FormControl( null, Validators.required),
-        dateTo: new FormControl( null, Validators.required)
+        dateTo: new FormControl( null, Validators.required),
+        location: new FormControl( null, Validators.required)
       }
     );
   }
 
+  onLocationPicked(location: PlaceLocation) {
+    this.form.patchValue({
+      location
+    });
+  }
   onCreateOffer() {
     if (!this.form.valid) { return; }
 
@@ -40,7 +47,8 @@ export class NewOfferPage implements OnInit {
       description: this.form.value.description,
       price: +this.form.value.price,
       dateFrom: new Date(this.form.value.dateFrom),
-      dateTo: new Date(this.form.value.dateTo)
+      dateTo: new Date(this.form.value.dateTo),
+      location: this.form.value.location
     };
 
     this.loadingCtrl
@@ -54,7 +62,8 @@ export class NewOfferPage implements OnInit {
           place.description,
           place.price,
           place.dateFrom,
-          place.dateTo)
+          place.dateTo,
+          place.location)
             .subscribe(() => {
               loadingEl.dismiss();
               this.form.reset();

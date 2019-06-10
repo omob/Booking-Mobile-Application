@@ -15,6 +15,7 @@ export class DiscoverPage implements OnInit {
   $places: Observable<Place[]>;
   isLoading: boolean = false;
   placesSub: Subscription;
+  error = false;
 
   constructor(private placesService: PlacesService) { }
 
@@ -26,7 +27,12 @@ export class DiscoverPage implements OnInit {
     this.isLoading = true;
 
     this.placesSub = this.placesService.fetchPlaces()
-    .subscribe(() => this.isLoading = false );
+    .subscribe(
+      () => { this.isLoading = false; },
+      error => {
+        this.isLoading = false;
+        this.error = true;
+      });
   }
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {

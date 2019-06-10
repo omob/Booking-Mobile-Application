@@ -7,6 +7,7 @@ import { Place } from './../../place.model';
 import { PlacesService } from './../../places.service';
 import { AuthService } from './../../../../auth/auth.service';
 import { BookingService } from './../../../bookings/booking.service';
+import { MapModalComponent } from './../../../../shared/map-modal/map-modal.component';
 
 @Component({
   selector: 'app-place-detail',
@@ -115,17 +116,19 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
           .then(loadingEl => {
             loadingEl.present();
 
+            const { id, title, imageUrl } = this.place;
             const { bookingData } = data;
+            const { firstName, lastName, guestNumber, startDate, endDate } = bookingData;
 
             this.bookingService.addBooking(
-               this.place.id,
-               this.place.title,
-               this.place.imageUrl,
-               bookingData.firstName,
-               bookingData.lastName,
-               bookingData.guestNumber,
-               bookingData.startDate,
-               bookingData.endDate)
+               id,
+               title,
+               imageUrl,
+               firstName,
+               lastName,
+               guestNumber,
+               startDate,
+               endDate)
                .subscribe( () => {
                   loadingEl.dismiss();
                   // add message
@@ -139,5 +142,23 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     if (this._placeSubscription) {
       this._placeSubscription.unsubscribe();
     }
+  }
+
+  onShowFullMap() {
+    const { lat, lng, address } = this.place.location;
+    this.modalCtrl.create(
+      {
+        component: MapModalComponent,
+        componentProps: {
+          center: { lat, lng},
+          selectable: false,
+          closeButtonText: 'Close',
+          title: address
+        }
+      }
+    )
+    .then(modalEl => {
+      modalEl.present();
+    });
   }
 }

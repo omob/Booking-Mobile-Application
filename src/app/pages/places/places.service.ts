@@ -4,6 +4,7 @@ import { AuthService } from './../../auth/auth.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { take, map, delay, tap, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { PlaceLocation } from 'src/app/pages/places/location.model';
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +41,8 @@ export class PlacesService {
                   resData[key].price,
                   new Date(resData[key].availableFrom),
                   new Date( resData[key].availableTo),
-                  resData[key].userId
+                  resData[key].userId,
+                  resData[key].location
                   )
                 );
             }
@@ -69,7 +71,8 @@ export class PlacesService {
                   resData.price,
                   new Date(resData.availableFrom),
                   new Date(resData.availableTo),
-                  resData.userId);
+                  resData.userId,
+                  resData.location);
           }
 
           throw new Error('Place not found');
@@ -103,7 +106,8 @@ export class PlacesService {
           newPlace.price,
           oldPlace.availableFrom,
           oldPlace.availableTo,
-          oldPlace.userId );
+          oldPlace.userId,
+          oldPlace.location );
 
         placesCopy[index] = updatedPlace;
 
@@ -119,35 +123,43 @@ export class PlacesService {
     );
   }
 
-  addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date) {
-    let generatedId: string;
-    const newPlace = new Place(
-      Math.random().toString(),
-      title,
-      description,
-// tslint:disable-next-line: max-line-length
-      'https://static2.mansionglobal.com/production/media/article-images/2f6a5dc3d80ef19f3bc23ddc1e911adf/large_Screen-Shot-2017-12-07-at-12.11.10-PM.png',
-      price,
-      dateFrom,
-      dateTo,
-      this.authService.userId);
+  addPlace(
+    title: string,
+    description: string,
+    price: number,
+    dateFrom: Date,
+    dateTo: Date,
+    location: PlaceLocation
+  ) {
+      let generatedId: string;
+      const newPlace = new Place(
+        Math.random().toString(),
+        title,
+        description,
+  // tslint:disable-next-line: max-line-length
+        'https://static2.mansionglobal.com/production/media/article-images/2f6a5dc3d80ef19f3bc23ddc1e911adf/large_Screen-Shot-2017-12-07-at-12.11.10-PM.png',
+        price,
+        dateFrom,
+        dateTo,
+        this.authService.userId,
+        location);
 
-    return this.http.post<{name: string}>(this.url + '/offered-places.json', {
-      ...newPlace,
-      id: null
-    })
-    .pipe(
-      switchMap(resData => {
-        generatedId = resData.name;
-        return this.places;
-      }),
-      take(1),
-      tap( places => {
-        newPlace.id = generatedId;
-        return this._places.next(places.concat(newPlace));
+      return this.http.post<{name: string}>(this.url + '/offered-places.json', {
+        ...newPlace,
+        id: null
       })
-    );
-  }
+      .pipe(
+        switchMap(resData => {
+          generatedId = resData.name;
+          return this.places;
+        }),
+        take(1),
+        tap( places => {
+          newPlace.id = generatedId;
+          return this._places.next(places.concat(newPlace));
+        })
+      );
+    }
 
   get url() {
     return this._url;
@@ -164,4 +176,5 @@ interface PlaceData {
   price: number;
   title: string;
   userId: string;
+  location: PlaceLocation;
 }

@@ -15,6 +15,7 @@ export class OffersPage implements OnInit, OnDestroy {
   $places: Observable<Place[]>;
   isLoading: boolean = false;
   placesSub: Subscription;
+  error = false;
 
   constructor(
     private placesService: PlacesService,
@@ -28,7 +29,15 @@ export class OffersPage implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.placesSub = this.placesService.fetchPlaces()
-    .subscribe(() => this.isLoading = false );
+    .subscribe(
+      () => {
+        this.isLoading = false;
+      },
+      error => {
+        console.log(error);
+        this.error = true;
+        this.isLoading = false;
+      });
   }
 
   onEdit(placeId: string, slidingItem: IonItemSliding) {

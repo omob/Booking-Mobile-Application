@@ -76,8 +76,12 @@
       </ion-row>
     </ion-grid>
 
-    <div *ngIf="!isLoading && places.length == 0" text-center>
+    <div *ngIf="!isLoading && places.length == 0 && error == false" text-center padding>
       <p>No featured places at the moment... Please check back later</p>
+    </div>
+
+    <div *ngIf="!isLoading && error == true" text-center>
+      <p>Error fetching request... try again later.</p>
     </div>
   </ng-container>
 

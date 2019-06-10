@@ -6,7 +6,6 @@ import { environment } from './../../../../environments/environment';
 import { map, switchMap } from 'rxjs/operators';
 import { PlaceLocation } from 'src/app/pages/places/location.model';
 import { of } from 'rxjs';
-import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'app-location-picker',

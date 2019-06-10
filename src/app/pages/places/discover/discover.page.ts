@@ -32,11 +32,10 @@ export class DiscoverPage implements OnInit {
       error => {
         this.isLoading = false;
         this.error = true;
-      });
+      } );
   }
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
     console.log(event.detail);
   }
 }
-;

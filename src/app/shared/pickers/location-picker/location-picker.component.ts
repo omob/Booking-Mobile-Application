@@ -1,11 +1,8 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { MapModalComponent } from './../../map-modal/map-modal.component';
-import { HttpClient } from '@angular/common/http';
-import { environment } from './../../../../environments/environment';
-import { map, switchMap } from 'rxjs/operators';
 import { PlaceLocation } from 'src/app/pages/places/location.model';
-import { of } from 'rxjs';
+import { MapModalComponent } from './../../map-modal/map-modal.component';
+import { LocationService } from './location.service';
 
 @Component({
   selector: 'app-location-picker',
@@ -16,14 +13,12 @@ export class LocationPickerComponent implements OnInit {
 
   @Output() locationPick = new EventEmitter<PlaceLocation>();
 
-  googleMapsAPIKey;
   selectedLocationImage: string;
   isLoading = false;
 
-  constructor( private modalCtrl: ModalController, private http: HttpClient) { 
-    const { googleMapsAPIKey } = environment;
-    this.googleMapsAPIKey = googleMapsAPIKey;
-  }
+  constructor(
+    private modalCtrl: ModalController,
+    private locationService: LocationService) { }
 
   ngOnInit() {}
 
@@ -32,7 +27,7 @@ export class LocationPickerComponent implements OnInit {
       component: MapModalComponent
     })
     .then(modalEl => {
-      modalEl.onDidDismiss().then( modalData => {
+      modalEl.onDidDismiss().then( async modalData => {
         const { data: latLng, role } = modalData;
         if (!latLng) {
           return;
@@ -47,52 +42,24 @@ export class LocationPickerComponent implements OnInit {
 
         this.isLoading = true;
 
-        this.getAddress(latLng)
-          .pipe(
-            switchMap(address => {
-              pickedLocation.address = address;
-              return of(this.getMapImage(lat, lng, 16));
-            })
-          )
-        .subscribe(staticMapImageUrl => {
-          pickedLocation.staticMapImageUrl = staticMapImageUrl;
-          this.selectedLocationImage = staticMapImageUrl;
+        try {
+          const address = await this.locationService.getAddress(lat, lng);
+          pickedLocation.address = address;
+
+          const image = this.locationService.getMapImage(lat, lng, 16);
+          pickedLocation.staticMapImageUrl = image;
+          this.selectedLocationImage = image;
 
           this.isLoading = false;
           this.locationPick.emit(pickedLocation);
-        });
+        }
+        catch (e) {
+          console.error('ERROR GETTING ADDRESS', e);
+          this.isLoading = false;
+        }
       });
 
       modalEl.present();
     });
-  }
-
-
-  private getAddress({lat, lng}) {
-    return this.http
-      .get<{
-        plus_code: any,
-        results: any[],
-        status: string
-        }>
-        (`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.googleMapsAPIKey}`
-      )
-      .pipe(
-        map(geodata => {
-          const { results } = geodata;
-          if (!results || results.length === 0) {
-            return null;
-          }
-
-          const { formatted_address } = results[0];
-          return formatted_address;
-        })
-      );
-  }
-
-  private getMapImage(lat: number, lng: number, zoom: number) {
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=500x300&maptype=roadmap
-    &markers=color:red%7Clabel:Place%7C${lat},${lng}
-    &key=${this.googleMapsAPIKey}`;
   }
 }

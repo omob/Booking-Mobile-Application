@@ -30,7 +30,7 @@ plugins/android.json
 plugins/ios.json
 $RECYCLE.BIN/
 package-lock.json
-src/environments/
+src/environments/environment.ts
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate

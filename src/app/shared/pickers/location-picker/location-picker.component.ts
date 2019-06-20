@@ -1,12 +1,11 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import { MapModalComponent } from './../../map-modal/map-modal.component';
 import { HttpClient } from '@angular/common/http';
-import { environment } from './../../../../environments/environment';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { ModalController } from '@ionic/angular';
+import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { PlaceLocation } from 'src/app/pages/places/location.model';
-import { of } from 'rxjs';
-import { threadId } from 'worker_threads';
+import { environment } from './../../../../environments/environment';
+import { MapModalComponent } from './../../map-modal/map-modal.component';
 
 @Component({
   selector: 'app-location-picker',

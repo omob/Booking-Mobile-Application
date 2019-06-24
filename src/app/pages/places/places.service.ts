@@ -123,21 +123,33 @@ export class PlacesService {
     );
   }
 
+  uploadImage(image: File) {
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+
+    return this.http.post<{imageUrl: string, imagePath: string}>(
+      'https://us-central1-ionic-angular-app-42235.cloudfunctions.net/storeImage', 
+      uploadData
+    );
+
+
+  }
+
   addPlace(
     title: string,
     description: string,
     price: number,
     dateFrom: Date,
     dateTo: Date,
-    location: PlaceLocation
+    location: PlaceLocation,
+    imageUrl: string
   ) {
       let generatedId: string;
       const newPlace = new Place(
         Math.random().toString(),
         title,
         description,
-  // tslint:disable-next-line: max-line-length
-        'https://static2.mansionglobal.com/production/media/article-images/2f6a5dc3d80ef19f3bc23ddc1e911adf/large_Screen-Shot-2017-12-07-at-12.11.10-PM.png',
+        imageUrl,
         price,
         dateFrom,
         dateTo,

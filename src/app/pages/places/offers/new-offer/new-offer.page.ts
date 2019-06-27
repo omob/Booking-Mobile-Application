@@ -102,6 +102,9 @@ export class NewOfferPage implements OnInit {
           loadingEl.dismiss();
           this.form.reset();
           this.router.navigate(['/places/tabs/offers']);
+        }, error => {
+          loadingEl.dismiss();
+          console.log(`Error: could not create place.\n${error}`);
         });
     });
   }

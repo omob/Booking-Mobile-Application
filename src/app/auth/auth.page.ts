@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 import { NgForm } from '@angular/forms';
 
 @Component({
@@ -12,12 +12,14 @@ import { NgForm } from '@angular/forms';
 export class AuthPage implements OnInit {
 
   isLoading: boolean;
-  isLoginSwitch: boolean = true;
+  isLoginSwitch = true;
+  errorMessage = null;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private loadingCtrl: LoadingController) { }
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController) { }
 
   ngOnInit() {
   }
@@ -28,35 +30,58 @@ export class AuthPage implements OnInit {
     }
   }
 
-  onLogin() {
+  onAuthenticate({email, password}, mode: 'signup' | 'login') {
+    let message;
+    message = mode === 'signup' ? 'Signing up.' : 'Loggin in';
+
     this.loadingCtrl
-      .create({ keyboardClose: true, message: 'Logging in...'})
+      .create({ keyboardClose: true, message: `${message}...`})
       .then(loadingEl => {
         loadingEl.present();
-        setTimeout(() => {
-          const login = this.authService.login();
-          if (login) {
+
+        this.authService.signupOrLogin(email, password, mode)
+          .subscribe( () => {
             this.router.navigate(['/places/tabs/discover']);
-          }
-          loadingEl.dismiss();
-        }, 3000 );
+            loadingEl.dismiss();
+          }, ({error}) => {
+            this.showAuthError(error);
+            loadingEl.dismiss();
+          });
       });
+  }
+
+  async showAuthError(errorRes) {
+    console.log(errorRes)
+    const { message } = errorRes.error;
+    let messageRes;
+
+    if (message === 'EMAIL_EXISTS') {
+      messageRes = 'The email address is already in use by another account.';
+
+    } else if (message === 'INVALID_PASSWORD' || message === 'EMAIL_NOT_FOUND') {
+      messageRes = 'Invalid email or password';
+
+    } else {
+      messageRes = 'Could not authenticate your request at this time. Please try again later';
+    }
+
+    const alertEl = await this.alertCtrl.create({
+      header: 'Authentication Failed',
+      buttons: [ 'Okay' ],
+      message: messageRes
+    });
+
+    alertEl.present();
   }
 
   onSubmit(form: NgForm) {
     if (!form.valid) { return; }
 
-    const formDetail = form.value;
+    this.isLoginSwitch ?
+      this.onAuthenticate(form.value, 'login') :
+      this.onAuthenticate(form.value, 'signup');
 
-    if (this.isLoginSwitch) {
-      //send a request to login server
-      console.log(formDetail);
-      this.onLogin();
-    }
-    else {
-      //send a request to signup server
-    }
-
+    form.reset();
   }
 
   onSwitchAuthMode() {

@@ -8,6 +8,7 @@ import { PlacesService } from './../../places.service';
 import { AuthService } from './../../../../auth/auth.service';
 import { BookingService } from './../../../bookings/booking.service';
 import { MapModalComponent } from './../../../../shared/map-modal/map-modal.component';
+import { switchMap, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-place-detail',
@@ -41,28 +42,40 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this._placeSubscription = this.placesService.getPlace(placeId)
-      .subscribe(place =>  {
-        this.place = place;
-        this.isBookable = place.userId !== this.authService.userId;
-        this.isLoading = false;
-      }, error => {
-        this.alertCtrl.create(
-          {
-            header: 'An error occured!',
-            message: 'Could not load place',
-            buttons: [
-              {
-                text: 'Okay',
-                handler: () => {
-                  this.router.navigate(['/places/tabs/discover']);
-                }
+    let fetchedUserId;
+    this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('Found no user!');
+        }
+
+        fetchedUserId = userId;
+        return this.placesService
+          .getPlace(placeId);
+      })
+    )
+    .subscribe(place =>  {
+      this.place = place;
+      this.isBookable = place.userId !== fetchedUserId;
+      this.isLoading = false;
+    }, error => {
+      this.alertCtrl.create(
+        {
+          header: 'An error occured!',
+          message: 'Could not load place',
+          buttons: [
+            {
+              text: 'Okay',
+              handler: () => {
+                this.router.navigate(['/places/tabs/discover']);
               }
-            ]
-          }
-        )
-        .then(alertEL => alertEL.present());
-      });
+            }
+          ]
+        }
+      )
+      .then(alertEL => alertEL.present());
+    });
   }
 
   onBookPlace() {

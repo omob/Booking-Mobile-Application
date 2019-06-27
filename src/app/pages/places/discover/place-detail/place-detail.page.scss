@@ -6,13 +6,16 @@
 }
 
 p {
-    margin: 0;
+    margin-bottom: 0;
 }
+
 
 ion-content {
     
     ion-title{
         font-size: 16px;
         font-weight: bold;
+        display: block;
+        margin-top: 10px;
     }
 }

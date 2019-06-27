@@ -1,41 +1,73 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MenuController } from '@ionic/angular';
 import { SegmentChangeEventDetail } from '@ionic/core';
-import { Observable, Subscription } from 'rxjs';
-import { Place } from './../place.model';
-import { PlacesService } from './../places.service';
+import { Subscription } from 'rxjs';
+
+import { PlacesService } from '../places.service';
+import { Place } from '../place.model';
+import { AuthService } from './../../../auth/auth.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-discover',
   templateUrl: './discover.page.html',
-  styleUrls: ['./discover.page.scss'],
+  styleUrls: ['./discover.page.scss']
 })
-export class DiscoverPage implements OnInit {
 
-  places: Place [];
-  $places: Observable<Place[]>;
-  isLoading: boolean = false;
-  placesSub: Subscription;
-  error = false;
+export class DiscoverPage implements OnInit, OnDestroy {
+  loadedPlaces: Place[];
+  listedLoadedPlaces: Place[];
+  relevantPlaces: Place[];
+  isLoading = false;
+  private placesSub: Subscription;
 
-  constructor(private placesService: PlacesService) { }
+  constructor(
+    private placesService: PlacesService,
+    private menuCtrl: MenuController,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    this.$places = this.placesService.places;
+    this.placesSub = this.placesService.places.subscribe(places => {
+      this.loadedPlaces = places;
+      this.relevantPlaces = this.loadedPlaces;
+      this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+    });
   }
 
   ionViewWillEnter() {
     this.isLoading = true;
+    this.placesService.fetchPlaces().subscribe(() => {
+      this.isLoading = false;
+    });
+  }
 
-    this.placesSub = this.placesService.fetchPlaces()
-    .subscribe(
-      () => { this.isLoading = false; },
-      error => {
-        this.isLoading = false;
-        this.error = true;
-      } );
+  onOpenMenu() {
+    this.menuCtrl.toggle();
   }
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
-    console.log(event.detail);
+    this.authService.userId.pipe(
+      take(1)
+    )
+    .subscribe(userId => {
+      if (event.detail.value === 'all') {
+        this.relevantPlaces = this.loadedPlaces;
+
+        console.log(this.relevantPlaces)
+        this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+      } else {
+        this.relevantPlaces = this.loadedPlaces.filter(
+          place => place.userId !== userId
+        );
+        this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.placesSub) {
+      this.placesSub.unsubscribe();
+    }
   }
 }
